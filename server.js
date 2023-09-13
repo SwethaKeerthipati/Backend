@@ -1,3 +1,4 @@
+require("dotenv").config({ path: ".env.local" });
 const express = require("express");
 const mongoose = require("mongoose");
 const Product = require("./models/Product");
@@ -77,9 +78,7 @@ app.delete("/products/:id", async (req, res) => {
 
 mongoose.set("strictQuery", false);
 mongoose
-  .connect(
-    "mongodb+srv://swethakeerthipati:R8z42Ztvqf3GUJA3@cluster0.d0sfkdd.mongodb.net/Food"
-  )
+  .connect(process.env.MONGODB_URI)
   .then(() => {
     console.log("connected to MongoDB");
     app.listen(3000, () => {
