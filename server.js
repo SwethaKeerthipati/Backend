@@ -1,14 +1,19 @@
 require("dotenv").config({ path: ".env.local" });
 const express = require("express");
+const cors = require("cors");
 const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
 const Product = require("./models/Product");
-const app = express();
+const User = require("./models/User");
 
+const app = express();
+app.use(bodyParser.json());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cors());
+app.use("/images", express.static("public/images"));
 
-//routes
-//get
+// Product routes
 app.get("/", (req, res) => {
   res.send("Hello world");
 });
@@ -31,7 +36,7 @@ app.get("/products/:id", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-//post
+
 app.post("/products", async (req, res) => {
   try {
     const product = await Product.create(req.body);
@@ -42,47 +47,16 @@ app.post("/products", async (req, res) => {
   }
 });
 
-// update a product
-app.put("/products/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const product = await Product.findByIdAndUpdate(id, req.body);
-    if (!product) {
-      return res
-        .status(404)
-        .json({ message: `cannot find any product with ID ${id}` });
-    }
-    const updatedProduct = await Product.findById(id);
-    res.status(200).json(updatedProduct);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// delete a product
-
-app.delete("/products/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const product = await Product.findByIdAndDelete(id);
-    if (!product) {
-      return res
-        .status(404)
-        .json({ message: `cannot find any product with ID ${id}` });
-    }
-    res.status(200).json(product);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
+// User routes
+app.use("/user", require("./api/User"));
 
 mongoose.set("strictQuery", false);
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => {
-    console.log("connected to MongoDB");
-    app.listen(3000, () => {
-      console.log(`Node API app is running on port 3000`);
+    console.log("Connected to MongoDB");
+    app.listen(3002, () => {
+      console.log("Node API app is running on port 3002");
     });
   })
   .catch((error) => {
